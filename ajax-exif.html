@@ -1,0 +1,83 @@
+<script src="js/helpers.js"></script>
+<template>
+  <style type="text/css">
+    .exif div {
+      display: inline-block;
+    }
+  </style>
+  <div class="exif">
+    <div class="exif-model"><span id="model">Canon EOS 70D</span></div>
+    <div class="exif-aperture"><span id="aperture">f/22</span></div>
+    <div class="exif-shutter"><span id="shutter">1/20</span></div>
+    <div class="exif-iso"><span id="iso">100</span></div>
+    <div class="exif-focal"><span id="focal">28</span></div>
+  </div>
+</template>
+<script type="text/javascript">
+  var querySelector = function(selector) {
+    //currentScript is this ^ script tag, and the owner is this document around it
+    var script = document._currentScript || document.currentScript;
+    return script.ownerDocument.querySelector(selector);
+  };
+  var template = querySelector('template');
+  class AjaxExif extends HTMLElement {
+    static get observedAttributes() {
+      return ['base-url', 'album', 'filename'];
+    }
+    get baseUrl() { return this.getAttribute('base-url'); }
+    set baseUrl(val) {
+      if (val) this.setAttribute('base-url', val);
+      else this.removeAttribute('base-url');
+    }
+    get album() { return this.getAttribute('album'); }
+    set album(val) {
+      if (val) this.setAttribute('album', val);
+      else this.removeAttribute('album');
+    }
+    get filename() { return this.getAttribute('filename'); }
+    set filename(val) {
+      if (val) this.setAttribute('filename', val);
+      else this.removeAttribute('filename');
+    }
+    //most often - template setup things here
+    createdCallback() {
+      //this = the element itself
+      this.createShadowRoot();
+      this.shadowRoot.appendChild(document.importNode(template.content, true));
+    }
+    //event listeners here
+    attachedCallback() {
+      this._fetchExif()
+      .then(data => this._updateTemplate(data));
+    }
+    //event cleanup
+    detachedCallback() {
+    }
+    //happens when an observedAttribute changes
+    //react to attribute changes here
+    attributeChangedCallback() {
+      this._fetchExif()
+        .then(data => this._updateTemplate(data));
+    }
+    _fetchExif() {
+      var albumName = 'fishing';
+      var filename = 'DSC_0081.JPG';
+      var baseUrl = 'http://localhost:5555/photo-gal/?action=exif_read';
+      /* global getJSON */
+      // return getJSON(`${baseUrl}&album=${albumName}&file=${filename}`)
+      // return fetch('http://localhost:5555/exif', { mode: 'cors'})
+      return getJSON('http://localhost:5555/exif')
+      // .then(res => res.json());
+        .then(res => res);
+    }
+    _updateTemplate(data) {
+      var root = this.shadowRoot;
+      root.querySelector('#model').textContent = data.IFD0.Model;
+      root.querySelector('#aperture').textContent = data.COMPUTED.ApertureFNumber;
+      root.querySelector('#shutter').textContent = data.EXIF.ExposureTime;
+      root.querySelector('#iso').textContent = data.EXIF.ISOSpeedRatings;
+      root.querySelector('#focal').textContent = data.EXIF.FocalLength;
+    }
+  }
+  document.registerElement('ajax-exif', AjaxExif);
+</script>

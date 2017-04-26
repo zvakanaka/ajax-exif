@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>WC</title>
+    <link rel="import" href="./ajax-exif.html">
+  </head>
+  <body>
+    <ajax-exif url=""></ajax-exif>
+    <input type="text" id="github-id" name="" value="">
+    <button type="button" id="change" name="button">Change</button>
+    <script type="text/javascript">
+      var el = document.querySelector('ajax-exif');
+      var button = document.querySelector('button');
+      button.addEventListener('click', e => {
+        var val = document.querySelector('#github-id').value;
+        el.url = val;
+      });
+    </script>
+  </body>
+</html>
