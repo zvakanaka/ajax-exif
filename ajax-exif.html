@@ -1,16 +1,15 @@
-<script src="js/helpers.js"></script>
 <template>
   <style type="text/css">
     .exif div {
       display: inline-block;
     }
   </style>
-  <div class="exif">
-    <div class="exif-model"><span id="model">Canon EOS 70D</span></div>
-    <div class="exif-aperture"><span id="aperture">f/22</span></div>
-    <div class="exif-shutter"><span id="shutter">1/20</span></div>
-    <div class="exif-iso"><span id="iso">100</span></div>
-    <div class="exif-focal"><span id="focal">28</span></div>
+  <div id="exif-data" class="exif">
+    <div class="exif-model">&#128247; <span id="model">Loading</span></div>
+    <div class="exif-aperture">&#9678; <span id="aperture">Loading</span></div>
+    <div class="exif-shutter">&#9202; <span id="shutter">Loading</span></div>
+    <div class="exif-iso">ISO <span id="iso">Loading</span></div>
+    <div class="exif-focal">&#128207; <span id="focal">Loading</span></div>
   </div>
 </template>
 <script type="text/javascript">
@@ -57,26 +56,33 @@
     //react to attribute changes here
     attributeChangedCallback() {
       this._fetchExif()
-        .then(data => this._updateTemplate(data));
+        .then(data => this._updateTemplate(data))
+        .catch(err => console.warn);
     }
     _fetchExif() {
-      var albumName = 'fishing';
-      var filename = 'DSC_0081.JPG';
-      var baseUrl = 'http://localhost:5555/photo-gal/?action=exif_read';
-      /* global getJSON */
+      let baseUrl = this.baseUrl;
+      let albumName = this.album;
+      let filename = this.filename;
       // return getJSON(`${baseUrl}&album=${albumName}&file=${filename}`)
-      // return fetch('http://localhost:5555/exif', { mode: 'cors'})
-      return getJSON('http://localhost:5555/exif')
-      // .then(res => res.json());
-        .then(res => res);
+      return fetch(`${baseUrl}&album=${albumName}&file=${filename}`, { mode: 'cors' })
+        .then(res => {
+          if (typeof res === 'string') {
+            return false;
+          }
+          return res.json();
+        });
     }
     _updateTemplate(data) {
       var root = this.shadowRoot;
-      root.querySelector('#model').textContent = data.IFD0.Model;
-      root.querySelector('#aperture').textContent = data.COMPUTED.ApertureFNumber;
-      root.querySelector('#shutter').textContent = data.EXIF.ExposureTime;
-      root.querySelector('#iso').textContent = data.EXIF.ISOSpeedRatings;
-      root.querySelector('#focal').textContent = data.EXIF.FocalLength;
+      if (data) {
+        root.querySelector('#model').textContent = data.IFD0.Model;
+        root.querySelector('#aperture').textContent = data.COMPUTED.ApertureFNumber;
+        root.querySelector('#shutter').textContent = data.EXIF.ExposureTime;
+        root.querySelector('#iso').textContent = data.EXIF.ISOSpeedRatings;
+        root.querySelector('#focal').textContent = data.EXIF.FocalLength;
+      } else {
+        root.querySelector('#exif-data').textContent = 'No data';
+      }
     }
   }
   document.registerElement('ajax-exif', AjaxExif);
