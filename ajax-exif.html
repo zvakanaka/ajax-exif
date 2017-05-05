@@ -18,8 +18,15 @@
     var script = document._currentScript || document.currentScript;
     return script.ownerDocument.querySelector(selector);
   };
-  var template = querySelector('template');
-  class AjaxExif extends HTMLElement {
+  customElements.define('ajax-exif', class extends HTMLElement {
+    //template setup things here
+    constructor() {
+      super(); //always always
+      let shadowRoot = this.attachShadow({mode: 'open'});
+      const t = querySelector('template');
+      const instance = t.content.cloneNode(true);
+      shadowRoot.appendChild(instance);
+    }
     static get observedAttributes() {
       return ['base-url', 'album', 'filename'];
     }
@@ -37,12 +44,6 @@
     set filename(val) {
       if (val) this.setAttribute('filename', val);
       else this.removeAttribute('filename');
-    }
-    //most often - template setup things here
-    createdCallback() {
-      //this = the element itself
-      this.createShadowRoot();
-      this.shadowRoot.appendChild(document.importNode(template.content, true));
     }
     //event listeners here
     attachedCallback() {
@@ -84,6 +85,5 @@
         root.querySelector('#exif-data').textContent = 'No data';
       }
     }
-  }
-  document.registerElement('ajax-exif', AjaxExif);
+  });
 </script>
