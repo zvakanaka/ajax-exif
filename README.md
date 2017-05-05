@@ -1,3 +1,2 @@
-# ajax-exif
-
-Web Components Practice
+Ajax Exif Web Component
+[demo](https://zvakanaka.github.io/ajax-exif)
