@@ -2,19 +2,96 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>WC</title>
+    <title>Ajax Exif</title>
     <link rel="import" href="./ajax-exif.html">
   </head>
   <body>
-    <ajax-exif base-url="https://howtoterminal.com/photo-gal/?action=exif_read"
-               album="fishing"
-               filename="DSC_0081.JPG"></ajax-exif>
-   <ajax-exif base-url="https://howtoterminal.com/photo-gal/?action=exif_read"
-              album="spring"
-              filename="IMG_6418.JPG"></ajax-exif>
-    <ajax-exif base-url="https://howtoterminal.com/photo-gal/?action=exif_read"
-               album="Trainpassings"
-               filename="IMG_0518.JPG"></ajax-exif>
+
+    <ul id="album-list"></ul>
+
+    <a href="#">
+      <img id="thumbnail" src="" alt="Preview of Selected Image">
+    </a>
+    <ajax-exif></ajax-exif>
+
+    <ul id="image-list"></ul>
+
+    <script type="text/javascript">
+    const SERVER_NAME = 'https://howtoterminal.com';
+    const BASE_URL = `${SERVER_NAME}/photo-gal/`;
+    document.querySelector('ajax-exif').baseUrl = `${BASE_URL}?action=exif_read`;
+    /* get album names */
+    function getAlbums() {
+      return fetch(`${BASE_URL}?action=album_names`, { mode: 'cors' })
+        .then(res => {
+          if (typeof res === 'string') return false;
+          return res.json();
+        });
+    }
+    /* clean lists */
+    function removeChildren(parent) {
+      if (parent.children.length === 0) return false;
+      let previousAlbums = Array.from(parent.children);
+      previousAlbums.forEach(child => {
+        parent.removeChild(child);
+      });
+    }
+    /* do it all again */
+    function refreshAlbums(albumNames) {
+      removeChildren(document.querySelector('#album-list'));
+      albumNames.forEach(album => {
+        let a = document.createElement('a');
+        // a.setAttribute('href', `${BASE_URL}?action=album&album=${album}`);
+        a.setAttribute('href', `javascript:void(0);`);
+        a.setAttribute('id', `a-${album}`);
+        a.setAttribute('data-album', `${album}`);
+        a.innerHTML = `${album}`;
+        a.addEventListener('click', e => {
+          getImages(`${album}`).then((data) => refreshImages(data.images, album));
+        });
+        let li = document.createElement('li');
+        li.appendChild(a);
+        //link that tears down dom and inserts new images from request for that guy
+        document.querySelector('#album-list').appendChild(li);
+      });
+    }
+    getAlbums().then(refreshAlbums);
+
+    /* get images from an album */
+    function getImages(albumName) {
+      return fetch(`${BASE_URL}?action=pictures_in_album&album=${albumName}`, { mode: 'cors' })
+        .then(res => {
+          if (typeof res === 'string') return false;
+          return res.json();
+        });
+    }
+
+    function refreshImages(imageNames, album) {
+      removeChildren(document.querySelector('#image-list'));
+      imageNames.forEach(image => {
+        let a = document.createElement('a');
+        a.setAttribute('href', `javascript:void(0);`);
+        a.setAttribute('id', `i-${image}`);
+        a.setAttribute('data-album', `${album}`);
+        a.setAttribute('data-image', `${image}`);
+        a.innerHTML = `${image}`;
+        let li = document.createElement('li');
+        a.addEventListener('click', e => {
+          let ajaxExif = document.querySelector('ajax-exif');
+          // ajaxExif.baseUrl = `${BASE_URL}?action=exif_read`;
+          ajaxExif.album = album;
+          ajaxExif.filename = image;
+          let thumbnail = document.querySelector('img#thumbnail');
+          let formattedImage = image.split('.')[0]+'.webp';
+          thumbnail.src = `${SERVER_NAME}/photo/${album}/.thumb/${formattedImage}`;
+          thumbnail.parentElement.href = `${SERVER_NAME}/photo/${album}/.web/${formattedImage}`;
+        });
+        li.appendChild(a);
+        document.querySelector('#image-list').appendChild(li);
+      });
+    }
+
+    </script>
     <a href="https://github.com/zvakanaka/ajax-exif">GitHub</a>
   </body>
 </html>

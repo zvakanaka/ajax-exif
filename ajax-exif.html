@@ -1,16 +1,16 @@
 <template>
   <style type="text/css">
-    .exif div {
-      display: inline-block;
-    }
+    .exif div { display: inline-block; }
+    .hidden { display: none; }
   </style>
-  <div id="exif-data" class="exif">
+  <div id="exif-data" class="exif hidden">
     <div class="exif-model">&#128247; <span id="model">Loading</span></div>
     <div class="exif-aperture">&#9678; <span id="aperture">Loading</span></div>
     <div class="exif-shutter">&#9202; <span id="shutter">Loading</span></div>
     <div class="exif-iso">ISO <span id="iso">Loading</span></div>
     <div class="exif-focal">&#128207; <span id="focal">Loading</span></div>
   </div>
+  <div id="exif-status" class="error">No request</div>
 </template>
 <script type="text/javascript">
   var querySelector = function(selector) {
@@ -55,16 +55,22 @@
     }
     //happens when an observedAttribute changes
     //react to attribute changes here
-    attributeChangedCallback() {
-      this._fetchExif()
-        .then(data => this._updateTemplate(data))
-        .catch(err => console.warn);
+    attributeChangedCallback(name) {
+      console.log(name);
+      if (name === 'filename') {
+        this._fetchExif()
+          .then(data => this._updateTemplate(data))
+          .catch(err => console.warn);
+      }
     }
     _fetchExif() {
       let baseUrl = this.baseUrl;
       let albumName = this.album;
       let filename = this.filename;
-      // return getJSON(`${baseUrl}&album=${albumName}&file=${filename}`)
+      let root = this.shadowRoot;
+      root.querySelector('#exif-status').textContent = 'Loading';
+      root.querySelector('#exif-data').classList.add('hidden');
+      root.querySelector('#exif-status').classList.remove('hidden');
       return fetch(`${baseUrl}&album=${albumName}&file=${filename}`, { mode: 'cors' })
         .then(res => {
           if (typeof res === 'string') {
@@ -81,8 +87,12 @@
         root.querySelector('#shutter').textContent = data.EXIF.ExposureTime;
         root.querySelector('#iso').textContent = data.EXIF.ISOSpeedRatings;
         root.querySelector('#focal').textContent = data.EXIF.FocalLength;
+        root.querySelector('#exif-data').classList.remove('hidden');
+        root.querySelector('#exif-status').classList.add('hidden');
       } else {
-        root.querySelector('#exif-data').textContent = 'No data';
+        root.querySelector('#exif-status').textContent = 'No data';
+        root.querySelector('#exif-data').classList.add('hidden');
+        root.querySelector('#exif-status').classList.remove('hidden');
       }
     }
   });
