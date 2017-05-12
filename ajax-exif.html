@@ -56,7 +56,6 @@
     //happens when an observedAttribute changes
     //react to attribute changes here
     attributeChangedCallback(name) {
-      console.log(name);
       if (name === 'filename') {
         this._fetchExif()
           .then(data => this._updateTemplate(data))
@@ -86,7 +85,12 @@
         root.querySelector('#aperture').textContent = data.COMPUTED.ApertureFNumber;
         root.querySelector('#shutter').textContent = data.EXIF.ExposureTime;
         root.querySelector('#iso').textContent = data.EXIF.ISOSpeedRatings;
-        root.querySelector('#focal').textContent = data.EXIF.FocalLength;
+        let focalLengthArr = data.EXIF.FocalLength.split('/');
+        let focalLength = data.EXIF.FocalLength;
+        if (focalLengthArr.length >= 2) {
+          focalLength = focalLengthArr[0]/focalLengthArr[1];
+        }
+        root.querySelector('#focal').textContent = focalLength+'mm';
         root.querySelector('#exif-data').classList.remove('hidden');
         root.querySelector('#exif-status').classList.add('hidden');
       } else {

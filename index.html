@@ -4,18 +4,29 @@
     <meta charset="utf-8">
     <title>Ajax Exif</title>
     <link rel="import" href="./ajax-exif.html">
+    <style media="screen">
+      ul > li { list-style: none; }
+      .container { display: flex; max-width: 300px; }
+      aside { flex: 1; }
+      main { flex: 3; display: flex; flex-flow: column-reverse wrap; }
+      img { width: 100%; }
+    </style>
   </head>
   <body>
+    <div class="container">
+      <aside>
+        <ul id="album-list"><li>Loading</li></ul>
+      </aside>
 
-    <ul id="album-list"></ul>
-
-    <a href="#">
-      <img id="thumbnail" src="" alt="Preview of Selected Image">
-    </a>
-    <ajax-exif></ajax-exif>
-
-    <ul id="image-list"></ul>
-
+      <main>
+      <a href="#">
+      </a>
+        <ul id="image-list"></ul>
+        <ajax-exif></ajax-exif>
+        <img id="thumbnail" src="" alt="Preview of Selected Image">
+      </main>
+    </div>
+    <a href="https://github.com/zvakanaka/ajax-exif">View on GitHub</a>
     <script type="text/javascript">
     const SERVER_NAME = 'https://howtoterminal.com';
     const BASE_URL = `${SERVER_NAME}/photo-gal/`;
@@ -76,7 +87,7 @@
         a.setAttribute('data-image', `${image}`);
         a.innerHTML = `${image}`;
         let li = document.createElement('li');
-        a.addEventListener('click', e => {
+        a.addEventListener('mouseover', e => {
           let ajaxExif = document.querySelector('ajax-exif');
           // ajaxExif.baseUrl = `${BASE_URL}?action=exif_read`;
           ajaxExif.album = album;
@@ -90,8 +101,7 @@
         document.querySelector('#image-list').appendChild(li);
       });
     }
-
     </script>
-    <a href="https://github.com/zvakanaka/ajax-exif">GitHub</a>
+    <!-- <a href="https://github.com/zvakanaka/ajax-exif"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a> -->
   </body>
 </html>
