@@ -3,7 +3,6 @@
   <head>
     <meta charset="utf-8">
     <title>Ajax Exif</title>
-    <link rel="import" href="./ajax-exif.html">
     <style media="screen">
       ul > li { list-style: none; }
       .container { display: flex; max-width: 300px; }
@@ -11,6 +10,8 @@
       main { flex: 3; display: flex; flex-flow: column-reverse wrap; }
       img { width: 100%; }
     </style>
+    <script src="bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+    <link rel="import" href="ajax-exif.html">
   </head>
   <body>
     <div class="container">
@@ -30,7 +31,13 @@
     <script type="text/javascript">
     const SERVER_NAME = 'https://howtoterminal.com';
     const BASE_URL = `${SERVER_NAME}/photo-gal/`;
-    document.querySelector('ajax-exif').baseUrl = `${BASE_URL}?action=exif_read`;
+    window.addEventListener('WebComponentsReady', function(e) {
+      // imports are loaded and elements have been registered
+      console.log('Components are ready');
+      document.querySelector('ajax-exif').baseUrl = `${BASE_URL}?action=exif_read`;
+      getAlbums().then(refreshAlbums);
+    });
+
     /* get album names */
     function getAlbums() {
       return fetch(`${BASE_URL}?action=album_names`, { mode: 'cors' })
@@ -66,8 +73,6 @@
         document.querySelector('#album-list').appendChild(li);
       });
     }
-    getAlbums().then(refreshAlbums);
-
     /* get images from an album */
     function getImages(albumName) {
       return fetch(`${BASE_URL}?action=pictures_in_album&album=${albumName}`, { mode: 'cors' })
@@ -87,7 +92,7 @@
         a.setAttribute('data-image', `${image}`);
         a.innerHTML = `${image}`;
         let li = document.createElement('li');
-        a.addEventListener('mouseover', e => {
+        a.addEventListener('mouseover', ev => {
           let ajaxExif = document.querySelector('ajax-exif');
           // ajaxExif.baseUrl = `${BASE_URL}?action=exif_read`;
           ajaxExif.album = album;

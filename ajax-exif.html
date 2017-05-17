@@ -1,8 +1,4 @@
-<template>
-  <style type="text/css">
-    .exif div { display: inline-block; }
-    .hidden { display: none; }
-  </style>
+<template id="ajax-exif-template">
   <div id="exif-data" class="exif hidden">
     <div class="exif-model">&#128247; <span id="model">Loading</span></div>
     <div class="exif-aperture">&#9678; <span id="aperture">Loading</span></div>
@@ -13,19 +9,48 @@
   <div id="exif-status" class="error">No request</div>
 </template>
 <script type="text/javascript">
-  var querySelector = function(selector) {
+  let querySelector = function(selector) {
     //currentScript is this ^ script tag, and the owner is this document around it
-    var script = document._currentScript || document.currentScript;
-    return script.ownerDocument.querySelector(selector);
+    let script = document._currentScript || document.currentScript;
+    return script ? script.ownerDocument.querySelector(selector) : document.querySelector(selector);
   };
+  function isElementShadowRoot(el) {
+    if (el.toString() === '[Object] ShadowRoot') {
+      return true;
+    }
+    return false;
+  }
+  function supportsShadowDom() {//V1
+    return !!HTMLElement.prototype.attachShadow;
+  }
+
   customElements.define('ajax-exif', class extends HTMLElement {
     //template setup things here
     constructor() {
+      var styleEl = document.createElement('style');
+      styleEl.title = 'ajax-exif';
+      let css = `.exif div { display: inline-block; }
+      .hidden { display: none; }`;
+      styleEl.type = 'text/css';
+      if (styleEl.styleSheet) {
+        styleEl.styleSheet.cssText = css;
+      } else {
+        styleEl.appendChild(document.createTextNode(css));
+      }
+
       super(); //always always
-      let shadowRoot = this.attachShadow({mode: 'open'});
-      const t = querySelector('template');
+      const t = querySelector('template#ajax-exif-template');
       const instance = t.content.cloneNode(true);
-      shadowRoot.appendChild(instance);
+      if (supportsShadowDom) {
+        let shadowRoot = this.attachShadow({mode: 'open'});
+        shadowRoot.appendChild(instance);
+        shadowRoot.appendChild(styleEl);
+      } else {
+        this.appendChild(instance);
+        if (!document.querySelector('style[title="ajax-exif"]')) {
+          document.head.appendChild(styleEl);
+        }
+      }
     }
     static get observedAttributes() {
       return ['base-url', 'album', 'filename'];

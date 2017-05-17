@@ -1,0 +1,25 @@
+{
+  "name": "ajax-exif",
+  "homepage": "https://zvakanaka.github.io/ajax-exif",
+  "authors": [
+    "Adam Quinton <quintonish@gmail.com>"
+  ],
+  "description": "v1 web component to display exif neatly from an endpoint",
+  "main": "ajax-exif.html",
+  "keywords": [
+    "exif",
+    "web-component",
+    "v1"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "webcomponentsjs": "webcomponents/webcomponentsjs#^1.0.0"
+  }
+}
