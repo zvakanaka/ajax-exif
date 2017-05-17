@@ -10,7 +10,7 @@
       main { flex: 3; display: flex; flex-flow: column-reverse wrap; }
       img { width: 100%; }
     </style>
-    <script src="bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+    <script src="lib/webcomponents-lite.js"></script>
     <link rel="import" href="ajax-exif.html">
   </head>
   <body>
@@ -32,8 +32,7 @@
     const SERVER_NAME = 'https://howtoterminal.com';
     const BASE_URL = `${SERVER_NAME}/photo-gal/`;
     window.addEventListener('WebComponentsReady', function(e) {
-      // imports are loaded and elements have been registered
-      console.log('Components are ready');
+      //imports and custom elements loaded
       document.querySelector('ajax-exif').baseUrl = `${BASE_URL}?action=exif_read`;
       getAlbums().then(refreshAlbums);
     });
