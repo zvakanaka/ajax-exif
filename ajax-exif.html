@@ -28,10 +28,10 @@
     //template setup things here
     constructor() {
       var styleEl = document.createElement('style');
-      styleEl.title = 'ajax-exif';
+      styleEl.setAttribute('title', 'ajax-exif');
+      styleEl.setAttribute('type', 'text/css');
       let css = `.exif div { display: inline-block; }
       .hidden { display: none; }`;
-      styleEl.type = 'text/css';
       if (styleEl.styleSheet) {
         styleEl.styleSheet.cssText = css;
       } else {
@@ -41,7 +41,7 @@
       super(); //always always
       const t = querySelector('template#ajax-exif-template');
       const instance = t.content.cloneNode(true);
-      if (supportsShadowDom) {
+      if (supportsShadowDom()) {
         let shadowRoot = this.attachShadow({mode: 'open'});
         shadowRoot.appendChild(instance);
         shadowRoot.appendChild(styleEl);
@@ -91,7 +91,8 @@
       let baseUrl = this.baseUrl;
       let albumName = this.album;
       let filename = this.filename;
-      let root = this.shadowRoot;
+      let root = this;
+      if (supportsShadowDom()) root = this.shadowRoot;
       root.querySelector('#exif-status').textContent = 'Loading';
       root.querySelector('#exif-data').classList.add('hidden');
       root.querySelector('#exif-status').classList.remove('hidden');
@@ -104,7 +105,8 @@
         });
     }
     _updateTemplate(data) {
-      var root = this.shadowRoot;
+      let root = this;
+      if (supportsShadowDom()) root = this.shadowRoot;
       if (data) {
         root.querySelector('#model').textContent = data.IFD0.Model;
         root.querySelector('#aperture').textContent = data.COMPUTED.ApertureFNumber;

@@ -10,7 +10,8 @@
       main { flex: 3; display: flex; flex-flow: column-reverse wrap; }
       img { width: 100%; }
     </style>
-    <script src="lib/webcomponents-lite.js"></script>
+    <!-- <script src="lib/webcomponents-lite.js"></script> -->
+    <script src="lib/webcomponents-hi-ce.js"></script>
     <link rel="import" href="ajax-exif.html">
   </head>
   <body>
@@ -97,13 +98,22 @@
           ajaxExif.album = album;
           ajaxExif.filename = image;
           let thumbnail = document.querySelector('img#thumbnail');
-          let formattedImage = image.split('.')[0]+'.webp';
+          let imageFormat = supportsWebP() ? '.webp' : '.jpg';
+          let formattedImage = image.split('.')[0]+imageFormat;
           thumbnail.src = `${SERVER_NAME}/photo/${album}/.thumb/${formattedImage}`;
           thumbnail.parentElement.href = `${SERVER_NAME}/photo/${album}/.web/${formattedImage}`;
         });
         li.appendChild(a);
         document.querySelector('#image-list').appendChild(li);
       });
+    }
+
+    function supportsWebP() {
+      let el = document.createElement('canvas');
+      if (el.getContext && el.getContext('2d')) {
+        return el.toDataURL('image/webp').indexOf('data:image/webp') === 0;
+      }
+      return false;
     }
     </script>
     <!-- <a href="https://github.com/zvakanaka/ajax-exif"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a> -->
