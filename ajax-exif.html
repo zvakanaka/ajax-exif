@@ -15,13 +15,19 @@
     return script ? script.ownerDocument.querySelector(selector) : document.querySelector(selector);
   };
   function isElementShadowRoot(el) {
-    if (el.toString() === '[Object] ShadowRoot') {
-      return true;
-    }
-    return false;
+    return !!(el.toString() === '[Object] ShadowRoot');
   }
   function supportsShadowDom() {//V1
     return !!HTMLElement.prototype.attachShadow;
+  }
+  // Reduce a fraction by finding the Greatest Common Divisor and dividing by it.
+  // Found here: http://stackoverflow.com/a/4652513
+  function simplify(numerator, denominator) {
+    let gcd = function gcd(a, b) {
+      return b ? gcd(b, a%b) : a;
+    };
+    gcd = gcd(numerator, denominator);
+    return [numerator/gcd, denominator/gcd];
   }
 
   customElements.define('ajax-exif', class extends HTMLElement {
@@ -110,13 +116,18 @@
       if (data) {
         root.querySelector('#model').textContent = data.IFD0.Model;
         root.querySelector('#aperture').textContent = data.COMPUTED.ApertureFNumber;
-        root.querySelector('#shutter').textContent = data.EXIF.ExposureTime;
-        root.querySelector('#iso').textContent = data.EXIF.ISOSpeedRatings;
-        let focalLengthArr = data.EXIF.FocalLength.split('/');
-        let focalLength = data.EXIF.FocalLength;
-        if (focalLengthArr.length >= 2) {
-          focalLength = focalLengthArr[0]/focalLengthArr[1];
+        let shutter = data.EXIF.ExposureTime;
+        let shutterArr = shutter.split('/');
+        if (shutterArr.length >= 2) {
+          root.querySelector('#shutter').textContent = simplify(shutterArr[0], shutterArr[1])
+            .join('/');
+        } else {
+          root.querySelector('#shutter').textContent = shutter;
         }
+        root.querySelector('#iso').textContent = data.EXIF.ISOSpeedRatings;
+        let focalLength = data.EXIF.FocalLength;
+        let focalLengthArr = focalLength.split('/');
+        if (focalLengthArr.length >= 2) focalLength = focalLengthArr[0]/focalLengthArr[1];
         root.querySelector('#focal').textContent = focalLength+'mm';
         root.querySelector('#exif-data').classList.remove('hidden');
         root.querySelector('#exif-status').classList.add('hidden');
